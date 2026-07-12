@@ -365,6 +365,44 @@
   .upload-slot.main{border-color:var(--gold);color:var(--gold);background:#f2b84b12;}
   .upload-slot .us-star{position:absolute;top:6px;right:8px;font-size:12px;}
 
+  /* ===== BOTTOM NAV (mobile-app style) ===== */
+  body{padding-bottom:76px;}
+  .page{display:block;}
+  .bottom-nav{
+    position:fixed;bottom:0;left:0;right:0;z-index:150;
+    display:flex;justify-content:space-around;align-items:center;
+    background:#0a0d16f2;backdrop-filter:blur(14px);border-top:1px solid var(--border);
+    padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+  }
+  .nav-item{
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    color:var(--text-dim);font-size:11px;flex:1;padding:6px 4px;border-radius:10px;position:relative;
+  }
+  .nav-item .nav-icon{font-size:19px;line-height:1;}
+  .nav-item.active{color:#fff;}
+  .nav-item.active .nav-icon{filter:drop-shadow(0 0 6px #8b5cf688);}
+  .nav-badge{
+    position:absolute;top:0;right:18%;background:var(--danger);color:#fff;
+    font-size:9.5px;padding:1px 5px;border-radius:999px;min-width:15px;text-align:center;
+  }
+
+  /* ===== CHATS LIST (Telegram-style) ===== */
+  .chats-list-row{
+    display:flex;align-items:center;gap:12px;padding:14px 4px;border-bottom:1px solid var(--border);cursor:pointer;
+  }
+  .chats-list-row:hover{background:#ffffff06;}
+  .chats-list-row .clr-info{flex:1;min-width:0;}
+  .chats-list-row .clr-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chats-list-row .clr-sub{font-size:12.5px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .clr-role-tag{font-size:10.5px;padding:3px 8px;border-radius:999px;flex-shrink:0;}
+  .clr-role-tag.buyer{background:#8b5cf61a;color:#c4b0ff;}
+  .clr-role-tag.seller{background:#34d3991a;color:#8be0c1;}
+
+  /* ===== PROFILE PAGE ===== */
+  .profile-header{display:flex;align-items:center;gap:14px;padding:24px 0 8px;}
+  .logged-out-box{text-align:center;padding:60px 20px;}
+  .logged-out-box p{color:var(--text-dim);margin-bottom:22px;}
+
   /* ===== LOGIN ===== */
   .login-overlay{
     position:fixed;inset:0;z-index:200;display:none;
@@ -415,9 +453,9 @@
 
 <script>
   // ====== CONFIGURE THESE THREE VALUES BEFORE DEPLOYING ======
- const SUPABASE_URL = "https://sqtrvfvvvyzoscghzsma.supabase.co";
- const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxdHJ2ZnZ2dnl6b3NjZ2h6c21hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2NzAyNTYsImV4cCI6MjA5OTI0NjI1Nn0.xpnma4caS6TR83rLZt_APnNMABFDxiLtZ6OUBWd3APs";
- const API_BASE = "https://nitragen-1.onrender.com";
+  const SUPABASE_URL = "https://sqtrvfvvvyzoscghzsma.supabase.co";
+  const SUPABASE_ANON_KEY = "YOUR-PUBLIC-ANON-KEY"; // safe to expose — it's the public key — PASTE YOUR anon KEY HERE
+  const API_BASE = "https://nitragen-1.onrender.com";
   // =============================================================
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 </script>
@@ -448,15 +486,10 @@
 <!-- ================= HEADER ================= -->
 <header>
   <span class="logo">NITRA<span>GEN</span></span>
-  <div class="search-bar">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b93ad" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-    <input id="searchInput" placeholder="Geroy yoki akkaunt qidiring: masalan 'Hayabusa Collector'" oninput="renderGrid()">
-  </div>
-  <div class="nav-actions">
-    <button class="btn btn-ghost" id="adminNavBtn" onclick="openAdmin()" title="Faqat sayt egasi uchun" style="display:none;">🛡 Admin panel</button>
-    <div class="avatar-btn" id="avatarBtn" title="Mening panelim" onclick="openProfile()" style="cursor:pointer;">…</div>
-  </div>
 </header>
+
+<!-- ================= PAGE: HOME (hero + katalog) ================= -->
+<div class="page" id="page-home">
 
 <!-- ================= HERO ================= -->
 <section class="hero">
@@ -517,9 +550,15 @@
 
 <!-- ================= CATALOG ================= -->
 <section class="section">
-  <div class="section-head">
-    <h2>Katalog</h2>
-    <div class="filters" id="filterChips"></div>
+  <div class="section-head" style="flex-direction:column;align-items:stretch;gap:14px;">
+    <div class="search-bar" id="homeSearchBar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b93ad" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="searchInput" placeholder="Geroy yoki akkaunt qidiring: masalan 'Hayabusa Collector'" oninput="renderGrid()">
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <h2>Katalog</h2>
+      <div class="filters" id="filterChips"></div>
+    </div>
   </div>
   <div class="grid" id="catalogGrid"></div>
   <div class="ad-slot empty" id="adSlotBottom" style="margin-top:18px;">Reklama joyi — bu yerga faqat admin reklama joylashtira oladi</div>
@@ -539,6 +578,67 @@
     Email: <a href="mailto:abbosxojavaqqosov@gmail.com" style="color:var(--text-dim);text-decoration:underline;">abbosxojavaqqosov@gmail.com</a>
   </div>
 </footer>
+</div> <!-- /page-home -->
+
+<!-- ================= PAGE: CHATLARIM (Telegram-style list) ================= -->
+<div class="page" id="page-chats" style="display:none;">
+  <section class="section" style="padding-top:24px;">
+    <div class="section-head">
+      <h2>Chatlarim</h2>
+    </div>
+    <div id="chatsListWrap"></div>
+  </section>
+</div>
+
+<!-- ================= PAGE: PROFIL ================= -->
+<div class="page" id="page-profile" style="display:none;">
+  <section class="section" style="padding-top:24px;">
+
+    <div id="profileLoggedOut" class="logged-out-box" style="display:none;">
+      <div class="logo" style="font-size:26px;display:block;margin-bottom:14px;">NITRA<span style="color:var(--gold);">GEN</span></div>
+      <p>Profilingizni ko'rish, e'lon joylash va chatlarga kirish uchun tizimga kiring.</p>
+      <button class="btn btn-primary" onclick="signInWithGoogle()" style="padding:13px 26px;">Google orqali kirish</button>
+    </div>
+
+    <div id="profileLoggedIn" style="display:none;">
+      <div class="profile-header">
+        <div class="avatar-btn" id="avatarBtnBig" style="width:56px;height:56px;font-size:16px;">…</div>
+        <div>
+          <div style="font-weight:700;font-size:17px;" id="profileNameBig">—</div>
+          <div style="font-size:12.5px;color:var(--text-dim);" id="profileEmailBig">—</div>
+        </div>
+        <button class="btn btn-ghost" style="margin-left:auto;" onclick="signOut()">Chiqish</button>
+      </div>
+
+      <button class="btn btn-ghost" id="adminNavBtn" onclick="openAdmin()" style="display:none;width:100%;margin:16px 0;padding:13px;">🛡 Admin panelni ochish</button>
+
+      <div class="panel-stats" id="panelStats" style="margin-top:16px;"></div>
+      <div class="section-head" style="margin:26px 0 14px;">
+        <h2 style="font-size:16px;">Mening e'lonlarim <span id="myCount" class="mono" style="color:var(--text-dim);font-size:13px;"></span></h2>
+        <button class="btn btn-primary" onclick="openSell();">+ Yangi e'lon qo'shish</button>
+      </div>
+      <div id="myListings" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+
+  </section>
+</div>
+
+<!-- ================= BOTTOM NAVIGATION ================= -->
+<nav class="bottom-nav">
+  <div class="nav-item active" data-tab="home" onclick="switchTab('home')">
+    <span class="nav-icon">🏠</span><span>Bosh sahifa</span>
+  </div>
+  <div class="nav-item" data-tab="search" onclick="switchTab('search')">
+    <span class="nav-icon">🔍</span><span>Qidiruv</span>
+  </div>
+  <div class="nav-item" data-tab="chats" onclick="switchTab('chats')">
+    <span class="nav-icon">💬</span><span>Chatlarim</span>
+    <span class="nav-badge" id="chatsNavBadge" style="display:none;"></span>
+  </div>
+  <div class="nav-item" data-tab="profile" onclick="switchTab('profile')">
+    <span class="nav-icon">👤</span><span>Profil</span>
+  </div>
+</nav>
 
 <!-- ================= ACCOUNT DETAIL OVERLAY ================= -->
 <div class="overlay" id="detailOverlay">
@@ -617,26 +717,6 @@
       <textarea id="sellComment" placeholder="Akkaunt haqida qo'shimcha ma'lumot: rank, skinlar, emblema darajasi va h.k."></textarea>
     </div>
     <button class="btn btn-primary" style="width:100%;padding:14px;" onclick="submitSell()">E'lonni joylash</button>
-  </div>
-</div>
-
-<!-- ================= SELLER PANEL (PROFILE) — FULL PAGE ================= -->
-<div class="dash-overlay" id="profileOverlay">
-  <div class="dash-topbar">
-    <button class="dash-back" onclick="closeOverlay('profileOverlay')">← Saytga qaytish</button>
-    <div class="dash-heading">
-      <b>Sotuvchi paneli</b>
-      <span id="profileUserLabel">Obunachi profili</span>
-    </div>
-    <button class="btn btn-ghost" style="margin-left:auto;" onclick="signOut()">Chiqish</button>
-  </div>
-  <div class="dash-body">
-    <div class="panel-stats" id="panelStats"></div>
-    <div class="section-head" style="margin:26px 0 14px;">
-      <h2 style="font-size:16px;">Mening e'lonlarim <span id="myCount" class="mono" style="color:var(--text-dim);font-size:13px;"></span></h2>
-      <button class="btn btn-primary" onclick="closeOverlay('profileOverlay');openSell();">+ Yangi e'lon qo'shish</button>
-    </div>
-    <div id="myListings" style="display:flex;flex-direction:column;gap:10px;"></div>
   </div>
 </div>
 
@@ -733,10 +813,75 @@ function signOut(){
 async function loadMe(){
   try{
     currentProfile = await api('/api/me');
-    document.getElementById('avatarBtn').textContent = (currentProfile.name || currentProfile.email || '?').slice(0,2).toUpperCase();
-    document.getElementById('profileUserLabel').textContent = `@${currentProfile.email}`;
-    document.getElementById('adminNavBtn').style.display = currentProfile.role === 'admin' ? 'inline-flex' : 'none';
-  }catch(e){ /* not logged in yet */ }
+    const initials = (currentProfile.name || currentProfile.email || '?').slice(0,2).toUpperCase();
+    document.getElementById('avatarBtnBig').textContent = initials;
+    document.getElementById('profileNameBig').textContent = currentProfile.name || 'Foydalanuvchi';
+    document.getElementById('profileEmailBig').textContent = `@${currentProfile.email}`;
+    document.getElementById('adminNavBtn').style.display = currentProfile.role === 'admin' ? 'block' : 'none';
+    document.getElementById('profileLoggedOut').style.display = 'none';
+    document.getElementById('profileLoggedIn').style.display = 'block';
+  }catch(e){
+    currentProfile = null;
+    document.getElementById('profileLoggedOut').style.display = 'block';
+    document.getElementById('profileLoggedIn').style.display = 'none';
+  }
+}
+
+/* ---------- BOTTOM NAV / PAGE SWITCHING ---------- */
+function switchTab(tab){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.tab===tab));
+  const showHome = (tab==='home' || tab==='search');
+  document.getElementById('page-home').style.display = showHome ? 'block' : 'none';
+  document.getElementById('page-chats').style.display = (tab==='chats') ? 'block' : 'none';
+  document.getElementById('page-profile').style.display = (tab==='profile') ? 'block' : 'none';
+  window.scrollTo({top:0, behavior:'instant'});
+
+  if(tab==='search'){
+    document.getElementById('homeSearchBar').scrollIntoView({behavior:'smooth', block:'start'});
+    setTimeout(()=>document.getElementById('searchInput').focus(), 300);
+  }
+  if(tab==='chats'){
+    if(!currentSession){ showToast("Chatlarni ko'rish uchun tizimga kiring."); switchTab('profile'); return; }
+    renderChatsList();
+  }
+  if(tab==='profile'){
+    if(currentSession){ loadMe(); renderProfile(); }
+    else {
+      document.getElementById('profileLoggedOut').style.display = 'block';
+      document.getElementById('profileLoggedIn').style.display = 'none';
+    }
+  }
+}
+
+async function renderChatsList(){
+  const wrap = document.getElementById('chatsListWrap');
+  wrap.innerHTML = `<div class="empty-note">Yuklanmoqda...</div>`;
+  let myChats = [];
+  try{ myChats = await api('/api/my-chats'); }
+  catch(e){ wrap.innerHTML = `<div class="empty-note">Chatlarni yuklab bo'lmadi.</div>`; return; }
+
+  document.getElementById('chatsNavBadge').style.display = 'none';
+
+  if(myChats.length===0){
+    wrap.innerHTML = `<div class="empty-note">Sizda hali chatlar yo'q. Bir akkauntni sotib olishni boshlaganingizda yoki sizning e'loningizga xaridor yozganda, shu yerda ko'rinadi.</div>`;
+    return;
+  }
+  const myId = currentSession.user.id;
+  wrap.innerHTML = myChats.map(c=>{
+    const isBuyer = c.buyer_id === myId;
+    const role = isBuyer ? 'buyer' : 'seller';
+    const otherName = isBuyer ? ((c.seller&&c.seller.name)||'Sotuvchi') : ((c.buyer&&c.buyer.name)||'Xaridor');
+    const title = c.listings ? c.listings.title : "E'lon";
+    return `
+    <div class="chats-list-row" onclick="openChatWithId(${c.id}, '${escapeHtml(title)}', '${escapeHtml(otherName)}', '${role}')">
+      <div class="avatar-btn" style="flex-shrink:0;">${otherName.slice(0,2).toUpperCase()}</div>
+      <div class="clr-info">
+        <div class="clr-title">#${c.listing_id} — ${escapeHtml(title)}</div>
+        <div class="clr-sub">${isBuyer ? '@'+escapeHtml(otherName)+' (sotuvchi)' : '@'+escapeHtml(otherName)+' (xaridor)'}</div>
+      </div>
+      <span class="clr-role-tag ${role}">${isBuyer ? 'Xarid' : 'Sotuv'}</span>
+    </div>`;
+  }).join('');
 }
 
 document.getElementById('loginOverlay').classList.add('open');
@@ -1049,14 +1194,8 @@ async function submitSell(){
 }
 
 /* ---------------------------------------------------------------------
-   SELLER PANEL
+   SELLER PANEL (rendered inline inside the "Profil" bottom-nav page)
    --------------------------------------------------------------------- */
-async function openProfile(){
-  if(!currentSession){ showToast("Avval tizimga kiring."); return; }
-  document.getElementById('profileOverlay').classList.add('open');
-  await renderProfile();
-}
-
 async function renderProfile(){
   let mine = [], myChats = [];
   try{
