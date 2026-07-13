@@ -783,6 +783,23 @@ document.querySelectorAll('.overlay').forEach(ov=>{
 let currentSession = null;
 let currentProfile = null;
 
+// Safety net: in some browsers (in-app browsers, strict cookie settings)
+// the Supabase client's automatic URL detection can miss the OAuth
+// callback. If we land back with ?code=... in the URL, exchange it
+// for a session explicitly, then clean the URL.
+(async () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('code')) {
+    try {
+      const { error } = await supabaseClient.auth.exchangeCodeForSession(window.location.href);
+      if (error) console.error('OAuth exchange error:', error.message);
+    } catch (e) {
+      console.error('OAuth exchange threw:', e);
+    }
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+})();
+
 function authHeaders(){
   return currentSession ? {"Authorization": `Bearer ${currentSession.access_token}`} : {};
 }
