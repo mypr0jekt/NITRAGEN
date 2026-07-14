@@ -1,5 +1,5 @@
 """
-NITRAGEN backend — Flask + Supabase (Fixed)
+NITRAGEN backend — Flask + Supabase (Fixed v2)
 """
 
 import os
@@ -24,11 +24,11 @@ def verify_token():
     """Supabase access token'ni tekshirish va user_id qaytarish"""
     auth_header = request.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "):
-        print("No Authorization header")
+        print("❌ No Authorization header")
         return None
     
     token = auth_header.split(" ", 1)[1]
-    print(f"Token received: {token[:50]}...")
+    print(f"✅ Token received: {token[:50]}...")
     
     # Token'ni decode qilish (algoritmdan qat'i nazar)
     try:
@@ -40,25 +40,27 @@ def verify_token():
                 algorithms=["HS256"],
                 options={"verify_aud": False}
             )
-            print(f"Decoded with HS256: {decoded}")
+            print(f"✅ Decoded with HS256: sub={decoded.get('sub')}")
             return decoded
         
         # Agar secret yo'q bo'lsa, verify qilmasdan decode qilish
         decoded = jwt.decode(token, options={"verify_signature": False})
-        print(f"Decoded without verification: {decoded}")
+        print(f"✅ Decoded without verification: sub={decoded.get('sub')}")
         return decoded
         
     except Exception as e:
-        print(f"JWT decode error: {e}")
+        print(f"❌ JWT decode error: {e}")
         return None
 
 def get_profile(user_id):
     """User ID bo'yicha profilni olish"""
     try:
+        print(f"🔍 Looking for profile: {user_id}")
         res = sb.table("profiles").select("*").eq("id", user_id).single().execute()
+        print(f"📄 Profile result: {res.data}")
         return res.data
     except Exception as e:
-        print(f"get_profile error: {e}")
+        print(f"❌ get_profile error: {e}")
         return None
 
 def require_auth(f):
@@ -66,17 +68,18 @@ def require_auth(f):
     def wrapper(*args, **kwargs):
         payload = verify_token()
         if not payload:
+            print("❌ No valid token")
             return jsonify({"error": "Tizimga kirish talab qilinadi"}), 401
         
         # Token'dan user_id ni olish
         user_id = payload.get("sub") or payload.get("user_id")
         if not user_id:
-            print(f"Payload: {payload}")
+            print(f"❌ Payload: {payload}")
             return jsonify({"error": "Token'da user_id topilmadi"}), 401
         
         request.user_id = user_id
         request.user_email = payload.get("email")
-        print(f"Authenticated user: {user_id}")
+        print(f"✅ Authenticated user: {user_id} ({request.user_email})")
         return f(*args, **kwargs)
     return wrapper
 
@@ -96,8 +99,10 @@ def require_admin(f):
         
         profile = get_profile(user_id)
         if not profile or profile.get("role") != "admin":
+            print(f"❌ Not admin: {profile}")
             return jsonify({"error": "Faqat admin uchun"}), 403
         
+        print(f"✅ Admin access granted")
         return f(*args, **kwargs)
     return wrapper
 
@@ -106,31 +111,42 @@ def require_admin(f):
 @require_auth
 def me():
     try:
+        print(f"\n{'='*50}")
         print(f"=== ME ENDPOINT ===")
         print(f"User ID: {request.user_id}")
+        print(f"User Email: {request.user_email}")
         
         profile = get_profile(request.user_id)
         
         if not profile:
-            print(f"Profile not found, creating...")
-            # Yangi profil yaratish
-            new_profile = sb.table("profiles").insert({
-                "id": request.user_id,
-                "email": request.user_email or "unknown@email.com",
-                "name": "User",
-                "role": "user"
-            }).execute()
+            print(f" Profile not found in database!")
+            print(f"🔄 Creating new profile...")
             
-            if new_profile.data:
-                print(f"Profile created: {new_profile.data[0]}")
-                return jsonify(new_profile.data[0])
+            # Yangi profil yaratish
+            try:
+                new_profile = sb.table("profiles").insert({
+                    "id": request.user_id,
+                    "email": request.user_email or "unknown@email.com",
+                    "name": "User",
+                    "role": "user"
+                }).execute()
+                
+                if new_profile.data:
+                    print(f"✅ Profile created: {new_profile.data[0]}")
+                    return jsonify(new_profile.data[0])
+                else:
+                    print(f"❌ Profile creation returned no data")
+            except Exception as create_err:
+                print(f"❌ Profile creation error: {create_err}")
             
             return jsonify({"error": "Profil yaratib bo'lmadi"}), 404
         
-        print(f"Profile found: {profile}")
+        print(f"✅ Profile found: role={profile.get('role')}")
+        print(f"{'='*50}\n")
         return jsonify(profile)
+        
     except Exception as e:
-        print(f"me endpoint error: {e}")
+        print(f"❌ me endpoint error: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({"error": "Ichki xatolik"}), 500
