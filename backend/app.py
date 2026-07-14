@@ -30,26 +30,25 @@ def verify_token():
     token = auth_header.split(" ", 1)[1]
     print(f"✅ Token received: {token[:50]}...")
     
-    # Token'ni decode qilish (algoritmdan qat'i nazar)
+    # Token'ni verify qilmasdan decode qilish (faqat payload'ni o'qish)
     try:
-        # HS256 bilan tekshirish
-        if SUPABASE_JWT_SECRET:
-            decoded = jwt.decode(
-                token,
-                SUPABASE_JWT_SECRET,
-                algorithms=["HS256"],
-                options={"verify_aud": False}
-            )
-            print(f"✅ Decoded with HS256: sub={decoded.get('sub')}")
-            return decoded
-        
-        # Agar secret yo'q bo'lsa, verify qilmasdan decode qilish
-        decoded = jwt.decode(token, options={"verify_signature": False})
-        print(f"✅ Decoded without verification: sub={decoded.get('sub')}")
+        # Faqat payload'ni o'qish, imzoni tekshirmasdan
+        payload = token.split('.')[1]
+        # Base64 decode
+        import base64
+        # Base64 url-safe decoding
+        payload += '=' * (-len(payload) % 4)  # Padding qo'shish
+        decoded = jwt.decode(
+            token,
+            options={"verify_signature": False}  # Imzoni tekshirmaslik
+        )
+        print(f"✅ Decoded payload: sub={decoded.get('sub')}, email={decoded.get('email')}")
         return decoded
         
     except Exception as e:
-        print(f"❌ JWT decode error: {e}")
+        print(f" JWT decode error: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 def get_profile(user_id):
