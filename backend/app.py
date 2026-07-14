@@ -1,9 +1,10 @@
 """
-NITRAGEN backend — Flask + Supabase (Final Fixed)
+NITRAGEN backend — Flask + Supabase (Simple Version)
 """
 
 import os
-import jwt
+import json
+import base64
 from functools import wraps
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -19,31 +20,52 @@ CORS(app, origins=[FRONTEND_ORIGIN] if FRONTEND_ORIGIN != "*" else "*", supports
 
 sb: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
+def decode_token_simple(token):
+    """Token'ni oddiy usulda decode qilish"""
+    try:
+        # Token 3 qismdan iborat: header.payload.signature
+        parts = token.split('.')
+        if len(parts) != 3:
+            return None
+        
+        # Payload'ni decode qilish
+        payload = parts[1]
+        # Base64 padding qo'shish
+        payload += '=' * (-len(payload) % 4)
+        # Decode
+        decoded_bytes = base64.urlsafe_b64decode(payload)
+        decoded = json.loads(decoded_bytes)
+        
+        return decoded
+    except Exception as e:
+        print(f"Token decode error: {e}")
+        return None
+
 def verify_token():
-    """Token'dan user_id ni olish - imzoni tekshirmasdan"""
+    """Token'dan user_id ni olish"""
     auth_header = request.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "):
+        print("No Authorization header")
         return None
     
     token = auth_header.split(" ", 1)[1]
+    print(f"Token received: {token[:50]}...")
     
-    try:
-        # Faqat payload'ni o'qish, imzoni tekshirmasdan
-        decoded = jwt.decode(
-            token,
-            options={"verify_signature": False}
-        )
-        return decoded
-    except Exception as e:
-        print(f"JWT decode error: {e}")
-        return None
+    decoded = decode_token_simple(token)
+    if decoded:
+        print(f"Decoded: sub={decoded.get('sub')}, email={decoded.get('email')}")
+    
+    return decoded
 
 def get_profile(user_id):
     """User ID bo'yicha profilni olish"""
     try:
+        print(f"Looking for profile: {user_id}")
         res = sb.table("profiles").select("*").eq("id", user_id).single().execute()
+        print(f"Profile found: {res.data}")
         return res.data
     except Exception as e:
+        print(f"get_profile error: {e}")
         return None
 
 def require_auth(f):
@@ -87,10 +109,13 @@ def require_admin(f):
 @require_auth
 def me():
     try:
+        print(f"=== ME ENDPOINT ===")
+        print(f"User ID: {request.user_id}")
+        
         profile = get_profile(request.user_id)
         
         if not profile:
-            # Yangi profil yaratish
+            print("Profile not found, creating...")
             new_profile = sb.table("profiles").insert({
                 "id": request.user_id,
                 "email": request.user_email or "user@email.com",
@@ -99,14 +124,18 @@ def me():
             }).execute()
             
             if new_profile.data:
+                print(f"Profile created: {new_profile.data[0]}")
                 return jsonify(new_profile.data[0])
             
             return jsonify({"error": "Profil yaratib bo'lmadi"}), 404
         
+        print(f"Profile found: {profile}")
         return jsonify(profile)
     except Exception as e:
         print(f"me endpoint error: {e}")
-        return jsonify({"error": "Ichki xatolik"}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Ichki xatolik: {str(e)}"}), 500
 
 @app.get("/api/listings")
 def list_listings():
