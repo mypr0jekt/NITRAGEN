@@ -97,12 +97,41 @@ def require_admin(f):
 @require_auth
 def me():
     try:
+        print(f"=== ME ENDPOINT ===")
+        print(f"Request user_id: {request.user_id}")
+        print(f"Request user_email: {request.user_email}")
+        
+        # Profildan olish
         profile = get_profile(request.user_id)
+        print(f"Profile from DB: {profile}")
+        
         if not profile:
-            return jsonify({"error": "Profil topilmadi"}), 404
+            print(f"Profile not found! Creating new profile...")
+            
+            # Yangi profil yaratish
+            try:
+                new_profile = sb.table("profiles").insert({
+                    "id": request.user_id,
+                    "email": request.user_email,
+                    "name": "User",
+                    "role": "user"
+                }).execute()
+                
+                print(f"New profile created: {new_profile.data}")
+                
+                if new_profile.data:
+                    return jsonify(new_profile.data[0])
+            except Exception as create_error:
+                print(f"Profile creation error: {create_error}")
+            
+            return jsonify({"error": "Profil topilmadi va yaratib bo'lmadi"}), 404
+        
+        print(f"Profile found, returning...")
         return jsonify(profile)
     except Exception as e:
         print(f"me endpoint error: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": "Ichki xatolik"}), 500
 
 # LISTINGS
