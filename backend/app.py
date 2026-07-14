@@ -1,72 +1,93 @@
 """
-NITRAGEN backend — Flask + Supabase (Simple Version)
+NITRAGEN backend — Flask + Supabase
+
+Auth: the frontend logs in via Supabase (Google OAuth) and sends the
+resulting access token on every request as `Authorization: Bearer <token>`.
+This file verifies that token PROPERLY — checking its cryptographic
+signature against Supabase's public keys (JWKS) — before trusting anything
+in it. This matters: without signature verification, anyone could hand-craft
+a fake token claiming to be any user (including an admin) and the backend
+would believe them.
 """
 
 import os
-import json
-import base64
+import jwt
+from jwt import PyJWKClient
 from functools import wraps
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from supabase import create_client, Client
 
+# ---------------------------------------------------------------------
 # Config
+# ---------------------------------------------------------------------
 SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_SERVICE_ROLE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+SUPABASE_JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET")  # legacy fallback, optional
 FRONTEND_ORIGIN = os.environ.get("FRONTEND_ORIGIN", "*")
 
 app = Flask(__name__)
 CORS(app, origins=[FRONTEND_ORIGIN] if FRONTEND_ORIGIN != "*" else "*", supports_credentials=True)
 
+# service-role client: bypasses Row Level Security — used for every DB call
+# in this file, since access control is enforced here in Flask instead
+# (via require_auth / require_admin), not via Supabase RLS.
 sb: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
-def decode_token_simple(token):
-    """Token'ni oddiy usulda decode qilish"""
-    try:
-        # Token 3 qismdan iborat: header.payload.signature
-        parts = token.split('.')
-        if len(parts) != 3:
-            return None
-        
-        # Payload'ni decode qilish
-        payload = parts[1]
-        # Base64 padding qo'shish
-        payload += '=' * (-len(payload) % 4)
-        # Decode
-        decoded_bytes = base64.urlsafe_b64decode(payload)
-        decoded = json.loads(decoded_bytes)
-        
-        return decoded
-    except Exception as e:
-        print(f"Token decode error: {e}")
-        return None
+# Supabase's public key set — lets us verify a token's signature was
+# really produced by this Supabase project, whatever algorithm it
+# currently signs with (ES256, RS256, ...).
+_jwks_client = PyJWKClient(f"{SUPABASE_URL}/auth/v1/.well-known/jwks.json")
 
+
+# ---------------------------------------------------------------------
+# Auth helpers
+# ---------------------------------------------------------------------
 def verify_token():
-    """Token'dan user_id ni olish"""
+    """Pull the Supabase access token from the Authorization header,
+    cryptographically verify it, and return its payload (contains
+    'sub' = user id, 'email', etc.) — or None if missing/invalid/expired.
+    """
     auth_header = request.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "):
-        print("No Authorization header")
         return None
-    
     token = auth_header.split(" ", 1)[1]
-    print(f"Token received: {token[:50]}...")
-    
-    decoded = decode_token_simple(token)
-    if decoded:
-        print(f"Decoded: sub={decoded.get('sub')}, email={decoded.get('email')}")
-    
-    return decoded
+
+    # Primary path: verify against Supabase's current public signing key.
+    try:
+        signing_key = _jwks_client.get_signing_key_from_jwt(token)
+        return jwt.decode(
+            token,
+            signing_key.key,
+            algorithms=["ES256", "RS256"],
+            audience="authenticated",
+        )
+    except Exception as e:
+        print(f"JWKS verification failed: {e}")
+
+    # Fallback: legacy HS256 secret, for older Supabase projects.
+    if SUPABASE_JWT_SECRET:
+        try:
+            return jwt.decode(
+                token,
+                SUPABASE_JWT_SECRET,
+                algorithms=["HS256"],
+                audience="authenticated",
+            )
+        except Exception as e:
+            print(f"Legacy secret verification failed: {e}")
+
+    return None
+
 
 def get_profile(user_id):
-    """User ID bo'yicha profilni olish"""
     try:
-        print(f"Looking for profile: {user_id}")
         res = sb.table("profiles").select("*").eq("id", user_id).single().execute()
-        print(f"Profile found: {res.data}")
         return res.data
     except Exception as e:
         print(f"get_profile error: {e}")
         return None
+
 
 def require_auth(f):
     @wraps(f)
@@ -74,15 +95,14 @@ def require_auth(f):
         payload = verify_token()
         if not payload:
             return jsonify({"error": "Tizimga kirish talab qilinadi"}), 401
-        
         user_id = payload.get("sub")
         if not user_id:
             return jsonify({"error": "Token'da user_id topilmadi"}), 401
-        
         request.user_id = user_id
         request.user_email = payload.get("email")
         return f(*args, **kwargs)
     return wrapper
+
 
 def require_admin(f):
     @wraps(f)
@@ -90,53 +110,46 @@ def require_admin(f):
         payload = verify_token()
         if not payload:
             return jsonify({"error": "Tizimga kirish talab qilinadi"}), 401
-        
         user_id = payload.get("sub")
         if not user_id:
             return jsonify({"error": "Token'da user_id topilmadi"}), 401
-        
         request.user_id = user_id
         request.user_email = payload.get("email")
-        
+
         profile = get_profile(user_id)
         if not profile or profile.get("role") != "admin":
             return jsonify({"error": "Faqat admin uchun"}), 403
-        
         return f(*args, **kwargs)
     return wrapper
 
+
+# ---------------------------------------------------------------------
+# ME
+# ---------------------------------------------------------------------
 @app.get("/api/me")
 @require_auth
 def me():
     try:
-        print(f"=== ME ENDPOINT ===")
-        print(f"User ID: {request.user_id}")
-        
         profile = get_profile(request.user_id)
-        
         if not profile:
-            print("Profile not found, creating...")
             new_profile = sb.table("profiles").insert({
                 "id": request.user_id,
                 "email": request.user_email or "user@email.com",
-                "name": "User",
-                "role": "user"
+                "name": (request.user_email or "User").split("@")[0],
+                "role": "user",
             }).execute()
-            
             if new_profile.data:
-                print(f"Profile created: {new_profile.data[0]}")
                 return jsonify(new_profile.data[0])
-            
             return jsonify({"error": "Profil yaratib bo'lmadi"}), 404
-        
-        print(f"Profile found: {profile}")
         return jsonify(profile)
     except Exception as e:
         print(f"me endpoint error: {e}")
-        import traceback
-        traceback.print_exc()
         return jsonify({"error": f"Ichki xatolik: {str(e)}"}), 500
 
+
+# ---------------------------------------------------------------------
+# LISTINGS
+# ---------------------------------------------------------------------
 @app.get("/api/listings")
 def list_listings():
     try:
@@ -163,6 +176,7 @@ def list_listings():
         print(f"list_listings error: {e}")
         return jsonify([])
 
+
 @app.get("/api/listings/<int:listing_id>")
 def get_listing(listing_id):
     try:
@@ -175,6 +189,7 @@ def get_listing(listing_id):
     except Exception as e:
         print(f"get_listing error: {e}")
         return jsonify({"error": "Topilmadi"}), 404
+
 
 @app.post("/api/listings")
 @require_auth
@@ -203,6 +218,7 @@ def create_listing():
         print(f"create_listing error: {e}")
         return jsonify({"error": "E'lon yaratishda xatolik"}), 500
 
+
 @app.get("/api/my-listings")
 @require_auth
 def my_listings():
@@ -215,6 +231,7 @@ def my_listings():
         print(f"my_listings error: {e}")
         return jsonify([])
 
+
 @app.delete("/api/listings/<int:listing_id>")
 @require_auth
 def delete_listing(listing_id):
@@ -226,13 +243,17 @@ def delete_listing(listing_id):
             return jsonify({"error": "Bu sizning e'loningiz emas"}), 403
         if listing["status"] != "sold":
             return jsonify({"error": "Faqat sotilgan e'lonlarni o'chirish mumkin"}), 400
-        
+
         sb.table("listings").delete().eq("id", listing_id).execute()
         return jsonify({"ok": True, "message": "E'lon o'chirildi"})
     except Exception as e:
         print(f"delete_listing error: {e}")
         return jsonify({"error": "O'chirishda xatolik"}), 500
 
+
+# ---------------------------------------------------------------------
+# "SOTILDI" SO'ROV OQIMI
+# ---------------------------------------------------------------------
 @app.post("/api/listings/<int:listing_id>/request-sold")
 @require_auth
 def request_sold(listing_id):
@@ -256,6 +277,7 @@ def request_sold(listing_id):
         print(f"request_sold error: {e}")
         return jsonify({"error": "So'rov yuborishda xatolik"}), 500
 
+
 @app.get("/api/admin/requests")
 @require_admin
 def admin_list_requests():
@@ -267,6 +289,7 @@ def admin_list_requests():
     except Exception as e:
         print(f"admin_list_requests error: {e}")
         return jsonify([])
+
 
 @app.post("/api/admin/requests/<int:req_id>/approve")
 @require_admin
@@ -282,6 +305,7 @@ def admin_approve(req_id):
         print(f"admin_approve error: {e}")
         return jsonify({"error": "Tasdiqlashda xatolik"}), 500
 
+
 @app.post("/api/admin/requests/<int:req_id>/reject")
 @require_admin
 def admin_reject(req_id):
@@ -296,6 +320,10 @@ def admin_reject(req_id):
         print(f"admin_reject error: {e}")
         return jsonify({"error": "Bekor qilishda xatolik"}), 500
 
+
+# ---------------------------------------------------------------------
+# CHATS
+# ---------------------------------------------------------------------
 @app.post("/api/listings/<int:listing_id>/start-chat")
 @require_auth
 def start_chat(listing_id):
@@ -329,6 +357,7 @@ def start_chat(listing_id):
         print(f"start_chat error: {e}")
         return jsonify({"error": "Chat yaratishda xatolik"}), 500
 
+
 @app.get("/api/my-chats")
 @require_auth
 def my_chats():
@@ -340,6 +369,7 @@ def my_chats():
     except Exception as e:
         print(f"my_chats error: {e}")
         return jsonify([])
+
 
 @app.get("/api/admin/chats")
 @require_admin
@@ -353,6 +383,10 @@ def admin_chats():
         print(f"admin_chats error: {e}")
         return jsonify([])
 
+
+# ---------------------------------------------------------------------
+# ADS
+# ---------------------------------------------------------------------
 @app.get("/api/ads")
 def get_ads():
     try:
@@ -362,6 +396,7 @@ def get_ads():
         print(f"get_ads error: {e}")
         return jsonify([])
 
+
 @app.post("/api/admin/ads/<slot>")
 @require_admin
 def save_ad(slot):
@@ -369,31 +404,40 @@ def save_ad(slot):
         if slot not in ("top", "bottom"):
             return jsonify({"error": "Noto'g'ri slot"}), 400
         body = request.get_json(force=True)
-        sb.table("ads").update({
+        update_data = {
             "title": body.get("title", ""),
             "subtitle": body.get("subtitle", ""),
             "cta": body.get("cta", "Batafsil"),
             "color1": body.get("color1", "#241a3d"),
             "color2": body.get("color2", "#1a2b2a"),
-        }).eq("slot", slot).execute()
+        }
+        if body.get("image_url"):
+            update_data["image_url"] = body.get("image_url")
+        sb.table("ads").update(update_data).eq("slot", slot).execute()
         return jsonify({"ok": True})
     except Exception as e:
         print(f"save_ad error: {e}")
         return jsonify({"error": "Reklama saqlashda xatolik"}), 500
 
+
 @app.delete("/api/admin/ads/<slot>")
 @require_admin
 def clear_ad(slot):
     try:
-        sb.table("ads").update({"title": None, "subtitle": None, "cta": None}).eq("slot", slot).execute()
+        sb.table("ads").update({
+            "title": None, "subtitle": None, "cta": None, "image_url": None
+        }).eq("slot", slot).execute()
         return jsonify({"ok": True})
     except Exception as e:
         print(f"clear_ad error: {e}")
         return jsonify({"error": "Reklama o'chirishda xatolik"}), 500
 
+
+# ---------------------------------------------------------------------
 @app.get("/api/health")
 def health():
     return jsonify({"status": "ok"})
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
