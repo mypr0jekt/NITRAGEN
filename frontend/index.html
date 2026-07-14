@@ -40,6 +40,7 @@
   a{color:inherit;text-decoration:none;}
   button{font-family:inherit;cursor:pointer;border:none;}
 
+  /* HEX BADGE — signature element (rank medallion) */
   .hex{
     width:46px;height:46px;
     clip-path:polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
@@ -52,6 +53,7 @@
   .hex-epic{background:linear-gradient(145deg,#34d399,#1a9c72);color:#04140d;}
   .hex-master{background:linear-gradient(145deg,#4a90e2,#2a5aa0);color:#fff;}
 
+  /* ===== TOP NAV ===== */
   header{
     position:sticky;top:0;z-index:40;
     display:flex;align-items:center;gap:20px;
@@ -95,6 +97,7 @@
     display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:13px;
   }
 
+  /* ===== HERO ===== */
   .hero{
     position:relative;padding:70px 28px 50px;
     display:flex;flex-direction:column;align-items:center;text-align:center;
@@ -116,13 +119,24 @@
     -webkit-background-clip:text;background-clip:text;color:transparent;
   }
   .hero p{color:var(--text-dim);max-width:520px;font-size:16px;line-height:1.6;position:relative;z-index:1;}
+  .hero-stats{display:flex;gap:32px;margin-top:32px;position:relative;z-index:1;flex-wrap:wrap;justify-content:center;}
+  .hero-stat b{display:block;font-family:'Orbitron',sans-serif;font-size:22px;color:var(--text);}
+  .hero-stat span{font-size:12px;color:var(--text-dim);}
 
+  /* ===== SECTION ===== */
   .section{padding:20px 28px 60px;max-width:1240px;margin:0 auto;}
   .section-head{
     display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;
   }
   .section-head h2{font-family:'Orbitron',sans-serif;font-size:20px;margin:0;}
+  .filters{display:flex;gap:8px;flex-wrap:wrap;}
+  .chip{
+    padding:7px 14px;border-radius:999px;border:1px solid var(--border);
+    font-size:13px;color:var(--text-dim);background:var(--panel);
+  }
+  .chip.active{border-color:var(--violet);color:#fff;background:var(--violet-soft);}
 
+  /* ===== CATALOG GRID ===== */
   .grid{
     display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:18px;
   }
@@ -154,6 +168,7 @@
   .price{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--green);font-size:16px;}
   .seller-mini{font-size:11px;color:var(--text-dim);}
 
+  /* ===== MODALS / OVERLAY VIEWS ===== */
   .overlay{
     position:fixed;inset:0;background:#05070dcc;backdrop-filter:blur(6px);
     z-index:100;display:none;align-items:flex-start;justify-content:center;
@@ -172,6 +187,7 @@
   }
   .modal-close:hover{background:#ffffff22;}
 
+  /* account detail */
   .detail-gallery{
     position:relative;height:340px;border-radius:20px 20px 0 0;overflow:hidden;
   }
@@ -210,6 +226,7 @@
   .detail-actions{display:flex;gap:12px;}
   .detail-actions .btn{flex:1;text-align:center;padding:15px;font-size:15px;}
 
+  /* ===== CHAT ===== */
   .chat-modal{max-width:520px;height:640px;display:flex;flex-direction:column;overflow:hidden;}
   .chat-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
   .chat-participants{display:flex;}
@@ -231,6 +248,7 @@
   .chat-input input{flex:1;background:var(--panel);border:1px solid var(--border);border-radius:999px;padding:11px 16px;color:var(--text);outline:none;font-size:13.5px;}
   .chat-input button{width:42px;height:42px;border-radius:50%;background:var(--violet);color:#fff;font-size:16px;flex-shrink:0;}
 
+  /* ===== SELL FORM ===== */
   .sell-modal{max-width:560px;padding:30px;}
   .sell-modal h3{font-family:'Orbitron',sans-serif;margin:0 0 4px;font-size:20px;}
   .sell-modal .sub{color:var(--text-dim);font-size:13px;margin-bottom:22px;}
@@ -242,18 +260,16 @@
   }
   .field input:focus, .field textarea:focus{border-color:var(--violet);}
   .field textarea{resize:vertical;min-height:80px;}
-  .upload-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-  .upload-slot{
-    border:2px solid var(--border);border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;
-    background:var(--panel);font-size:11.5px;color:var(--text-dim);transition:.15s;position:relative;
+  .upload-zone{
+    border:2px dashed var(--border);border-radius:12px;padding:24px;text-align:center;color:var(--text-dim);
+    font-size:13px;
   }
-  .upload-slot .us-icon{font-size:20px;display:block;margin-bottom:6px;}
-  .upload-slot.main{border-color:var(--gold);color:var(--gold);background:#f2b84b12;}
-  .upload-slot .us-star{position:absolute;top:6px;right:8px;font-size:12px;}
   .tag-input-row{display:flex;flex-wrap:wrap;gap:8px;padding:10px;background:var(--panel);border:1px solid var(--border);border-radius:10px;}
   .tag-input-row input{border:none;background:none;flex:1;min-width:100px;padding:4px;}
   .rm{cursor:pointer;opacity:.6;margin-left:4px;}
 
+  /* ===== PANELS (Seller / Admin) ===== */
+  .panel-wide{max-width:760px;}
   .panel-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
   .stat-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;}
   .stat-card b{display:block;font-family:'Orbitron',sans-serif;font-size:22px;}
@@ -284,6 +300,7 @@
   .chat-row .cr-sub{font-size:11.5px;color:var(--text-dim);}
   .empty-note{text-align:center;padding:30px 0;color:var(--text-dim);font-size:13.5px;}
 
+  /* ===== FULL-PAGE DASHBOARD (Seller panel / Admin panel) ===== */
   .dash-overlay{
     display:none;position:fixed;inset:0;z-index:500;
     background:var(--bg);overflow-y:auto;
@@ -302,6 +319,7 @@
   .dash-heading span{font-size:12px;color:var(--text-dim);}
   .dash-body{max-width:820px;margin:0 auto;padding:28px 24px 60px;}
 
+  /* ===== AD SLOTS ===== */
   .ad-slot{
     border-radius:16px;overflow:hidden;position:relative;min-height:96px;
     display:flex;align-items:center;justify-content:space-between;gap:16px;
@@ -321,6 +339,7 @@
     text-transform:uppercase;
   }
 
+  /* ===== GALLERY CONTROLS ===== */
   .gal-controls{
     position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);
     display:flex;justify-content:space-between;padding:0 12px;z-index:3;pointer-events:none;
@@ -336,6 +355,17 @@
   }
   .gal-playpause:hover{background:#000000a0;}
 
+  /* ===== SELL FORM: main-photo picker ===== */
+  .upload-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .upload-slot{
+    border:2px solid var(--border);border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;
+    background:var(--panel);font-size:11.5px;color:var(--text-dim);transition:.15s;position:relative;
+  }
+  .upload-slot .us-icon{font-size:20px;display:block;margin-bottom:6px;}
+  .upload-slot.main{border-color:var(--gold);color:var(--gold);background:#f2b84b12;}
+  .upload-slot .us-star{position:absolute;top:6px;right:8px;font-size:12px;}
+
+  /* ===== BOTTOM NAV (mobile-app style) ===== */
   body{padding-bottom:76px;}
   .page{display:block;}
   .bottom-nav{
@@ -356,6 +386,7 @@
     font-size:9.5px;padding:1px 5px;border-radius:999px;min-width:15px;text-align:center;
   }
 
+  /* ===== CHATS LIST (Telegram-style) ===== */
   .chats-list-row{
     display:flex;align-items:center;gap:12px;padding:14px 4px;border-bottom:1px solid var(--border);cursor:pointer;
   }
@@ -367,10 +398,12 @@
   .clr-role-tag.buyer{background:#8b5cf61a;color:#c4b0ff;}
   .clr-role-tag.seller{background:#34d3991a;color:#8be0c1;}
 
+  /* ===== PROFILE PAGE ===== */
   .profile-header{display:flex;align-items:center;gap:14px;padding:24px 0 8px;}
   .logged-out-box{text-align:center;padding:60px 20px;}
   .logged-out-box p{color:var(--text-dim);margin-bottom:22px;}
 
+  /* ===== LOGIN ===== */
   .login-overlay{
     position:fixed;inset:0;z-index:200;display:none;
     background:radial-gradient(circle at 30% 20%,#241a3d,transparent 55%),radial-gradient(circle at 80% 80%,#16302a,transparent 50%),#080a12;
@@ -419,14 +452,17 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+  // ====== CONFIGURE THESE THREE VALUES BEFORE DEPLOYING ======
   const SUPABASE_URL = "https://sqtrvfvvvyzoscghzsma.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_N4uyAdBTsLVa3pqNlVn9Yg_wzg1gezo "; // SUPABASE'DAN OLING!
+  const SUPABASE_ANON_KEY = "YOUR-PUBLIC-ANON-KEY"; // safe to expose — it's the public key — PASTE YOUR anon KEY HERE
   const API_BASE = "https://nitragen-1.onrender.com";
+  // =============================================================
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 </script>
 </head>
 <body>
 
+<!-- ================= LOGIN OVERLAY ================= -->
 <div class="login-overlay open" id="loginOverlay">
   <div class="login-card">
     <div class="login-hexrow">
@@ -447,12 +483,15 @@
   </div>
 </div>
 
+<!-- ================= HEADER ================= -->
 <header>
   <span class="logo">NITRA<span>GEN</span></span>
 </header>
 
+<!-- ================= PAGE: HOME (hero + katalog) ================= -->
 <div class="page" id="page-home">
 
+<!-- ================= HERO ================= -->
 <section class="hero">
   <svg class="hero-bg-shapes" width="100%" height="100%" viewBox="0 0 1400 520" preserveAspectRatio="xMidYMid slice" style="position:absolute;top:0;left:0;opacity:.9;">
     <defs>
@@ -471,10 +510,14 @@
     <rect width="1400" height="520" fill="url(#hexgrid)"/>
     <circle cx="230" cy="120" r="180" fill="url(#glowV)"/>
     <circle cx="1180" cy="360" r="220" fill="url(#glowG)"/>
+
+    <!-- floating rank medallions -->
     <polygon points="120,60 160,80 160,120 120,140 80,120 80,80" fill="none" stroke="#8b5cf655" stroke-width="2"/>
     <polygon points="1220,90 1260,110 1260,150 1220,170 1180,150 1180,110" fill="none" stroke="#f2b84b4a" stroke-width="2"/>
     <polygon points="90,340 130,360 130,400 90,420 50,400 50,360" fill="none" stroke="#34d3994a" stroke-width="2"/>
     <polygon points="1310,220 1340,235 1340,265 1310,280 1280,265 1280,235" fill="none" stroke="#8b5cf640" stroke-width="2"/>
+
+    <!-- crossed blades motif, left -->
     <g transform="translate(60,200) rotate(-18)" stroke="#ffffff26" stroke-width="3" stroke-linecap="round">
       <line x1="0" y1="0" x2="90" y2="0"/>
       <polygon points="90,-6 108,0 90,6" fill="#ffffff26" stroke="none"/>
@@ -483,19 +526,29 @@
       <line x1="0" y1="0" x2="90" y2="0"/>
       <polygon points="90,-6 108,0 90,6" fill="#ffffff1a" stroke="none"/>
     </g>
+
+    <!-- shield silhouette, right -->
     <path d="M1300 380 L1340 396 V430 C1340 452 1322 468 1300 476 C1278 468 1260 452 1260 430 V396 Z" fill="none" stroke="#ffffff22" stroke-width="2.5"/>
+
+    <!-- orbiting shard, top center -->
     <polygon points="700,30 712,50 700,70 688,50" fill="#f2b84b33"/>
     <polygon points="740,55 750,72 740,89 730,72" fill="#8b5cf633"/>
   </svg>
   <div class="hero-eyebrow">✦ Akkauntlar bozori ✦</div>
   <h1>Geroylaringiz tayyor. <em>Sotuvchisi</em> — siz.</h1>
   <p>MLBB va boshqa oyin akkauntlarini xavfsiz soting va soting oling. Har bir savdo admin nazorati ostidagi maxfiy chatda amalga oshadi.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><b>2,410+</b><span>faol e'lon</span></div>
+    <div class="hero-stat"><b>860+</b><span>tasdiqlangan sotuvchi</span></div>
+    <div class="hero-stat"><b>100%</b><span>admin nazorati</span></div>
+  </div>
 </section>
 
 <section class="section" style="padding-top:0;">
   <div class="ad-slot empty" id="adSlotTop">Reklama joyi — bu yerga faqat admin reklama joylashtira oladi</div>
 </section>
 
+<!-- ================= CATALOG ================= -->
 <section class="section">
   <div class="section-head" style="flex-direction:column;align-items:stretch;gap:14px;">
     <div class="search-bar" id="homeSearchBar">
@@ -504,6 +557,7 @@
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
       <h2>Katalog</h2>
+      <div class="filters" id="filterChips"></div>
     </div>
   </div>
   <div class="grid" id="catalogGrid"></div>
@@ -524,8 +578,9 @@
     Email: <a href="mailto:abbosxojavaqqosov@gmail.com" style="color:var(--text-dim);text-decoration:underline;">abbosxojavaqqosov@gmail.com</a>
   </div>
 </footer>
-</div>
+</div> <!-- /page-home -->
 
+<!-- ================= PAGE: CHATLARIM (Telegram-style list) ================= -->
 <div class="page" id="page-chats" style="display:none;">
   <section class="section" style="padding-top:24px;">
     <div class="section-head">
@@ -535,6 +590,7 @@
   </section>
 </div>
 
+<!-- ================= PAGE: PROFIL ================= -->
 <div class="page" id="page-profile" style="display:none;">
   <section class="section" style="padding-top:24px;">
 
@@ -567,6 +623,7 @@
   </section>
 </div>
 
+<!-- ================= BOTTOM NAVIGATION ================= -->
 <nav class="bottom-nav">
   <div class="nav-item active" data-tab="home" onclick="switchTab('home')">
     <span class="nav-icon">🏠</span><span>Bosh sahifa</span>
@@ -575,14 +632,15 @@
     <span class="nav-icon">🔍</span><span>Qidiruv</span>
   </div>
   <div class="nav-item" data-tab="chats" onclick="switchTab('chats')">
-    <span class="nav-icon"></span><span>Chatlarim</span>
+    <span class="nav-icon">💬</span><span>Chatlarim</span>
     <span class="nav-badge" id="chatsNavBadge" style="display:none;"></span>
   </div>
   <div class="nav-item" data-tab="profile" onclick="switchTab('profile')">
-    <span class="nav-icon"></span><span>Profil</span>
+    <span class="nav-icon">👤</span><span>Profil</span>
   </div>
 </nav>
 
+<!-- ================= ACCOUNT DETAIL OVERLAY ================= -->
 <div class="overlay" id="detailOverlay">
   <div class="modal" style="max-width:880px;">
     <button class="modal-close" onclick="closeOverlay('detailOverlay')">✕</button>
@@ -590,6 +648,7 @@
   </div>
 </div>
 
+<!-- ================= CHAT OVERLAY ================= -->
 <div class="overlay" id="chatOverlay">
   <div class="modal chat-modal">
     <div class="chat-head">
@@ -615,6 +674,7 @@
   </div>
 </div>
 
+<!-- ================= SELL FORM OVERLAY ================= -->
 <div class="overlay" id="sellOverlay">
   <div class="modal sell-modal">
     <button class="modal-close" onclick="closeOverlay('sellOverlay')">✕</button>
@@ -660,6 +720,7 @@
   </div>
 </div>
 
+<!-- ================= ADMIN PANEL — FULL PAGE (faqat sayt egasiga ko'rinadi) ================= -->
 <div class="dash-overlay" id="adminOverlay">
   <div class="dash-topbar">
     <button class="dash-back" onclick="closeOverlay('adminOverlay')">← Saytga qaytish</button>
@@ -683,6 +744,14 @@
 <div class="toast" id="toast"></div>
 
 <script>
+
+/* =====================================================================
+   NITRAGEN — real backend integration
+   - Auth: Supabase (Google OAuth)
+   - Data: Flask API (API_BASE) for listings / delete-requests / ads / chat creation
+   - Realtime chat: Supabase Realtime, straight from the browser
+   ===================================================================== */
+
 const rankHex = {mythic:'hex-mythic', legend:'hex-legend', epic:'hex-epic', master:'hex-master'};
 const rankLabel = {mythic:'MYTHIC', legend:'LEGEND', epic:'EPIC', master:'MASTER'};
 const rankGradient = {
@@ -708,9 +777,16 @@ document.querySelectorAll('.overlay').forEach(ov=>{
   ov.addEventListener('click', e=>{ if(e.target===ov) closeOverlay(ov.id); });
 });
 
+/* ---------------------------------------------------------------------
+   AUTH
+   --------------------------------------------------------------------- */
 let currentSession = null;
 let currentProfile = null;
 
+// Safety net: in some browsers (in-app browsers, strict cookie settings)
+// the Supabase client's automatic URL detection can miss the OAuth
+// callback. If we land back with ?code=... in the URL, exchange it
+// for a session explicitly, then clean the URL.
 (async () => {
   const params = new URLSearchParams(window.location.search);
   if (params.has('code')) {
@@ -757,29 +833,18 @@ async function loadMe(){
     const initials = (currentProfile.name || currentProfile.email || '?').slice(0,2).toUpperCase();
     document.getElementById('avatarBtnBig').textContent = initials;
     document.getElementById('profileNameBig').textContent = currentProfile.name || 'Foydalanuvchi';
-    document.getElementById('profileEmailBig').textContent = currentProfile.email;
+    document.getElementById('profileEmailBig').textContent = `@${currentProfile.email}`;
     document.getElementById('adminNavBtn').style.display = currentProfile.role === 'admin' ? 'block' : 'none';
     document.getElementById('profileLoggedOut').style.display = 'none';
     document.getElementById('profileLoggedIn').style.display = 'block';
   }catch(e){
-    console.error('Profile yuklashda xatolik:', e);
-    if(currentSession){
-      const user = currentSession.user;
-      const initials = (user.user_metadata?.full_name || user.email || '?').slice(0,2).toUpperCase();
-      document.getElementById('avatarBtnBig').textContent = initials;
-      document.getElementById('profileNameBig').textContent = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Foydalanuvchi';
-      document.getElementById('profileEmailBig').textContent = user.email;
-      document.getElementById('adminNavBtn').style.display = 'none';
-      document.getElementById('profileLoggedOut').style.display = 'none';
-      document.getElementById('profileLoggedIn').style.display = 'block';
-    } else {
-      currentProfile = null;
-      document.getElementById('profileLoggedOut').style.display = 'block';
-      document.getElementById('profileLoggedIn').style.display = 'none';
-    }
+    currentProfile = null;
+    document.getElementById('profileLoggedOut').style.display = 'block';
+    document.getElementById('profileLoggedIn').style.display = 'none';
   }
 }
 
+/* ---------- BOTTOM NAV / PAGE SWITCHING ---------- */
 function switchTab(tab){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.tab===tab));
   const showHome = (tab==='home' || tab==='search');
@@ -846,23 +911,40 @@ supabaseClient.auth.getSession().then(({data:{session}})=>{
   }
 });
 supabaseClient.auth.onAuthStateChange((event, session)=>{
-  console.log('Auth event:', event, 'Session:', session);
   currentSession = session;
   if(session){
     document.getElementById('loginOverlay').classList.remove('open');
     loadMe();
-  } else if(event === 'SIGNED_OUT'){
+  } else {
     document.getElementById('loginOverlay').classList.add('open');
-    currentProfile = null;
   }
 });
 
+/* ---------------------------------------------------------------------
+   CATALOG
+   --------------------------------------------------------------------- */
+let activeFilter = 'all';
 let currentListings = [];
+
+function renderChips(){
+  const ranks = ['all','mythic','legend','epic','master'];
+  const labels = {all:'Barchasi', mythic:'Mythic', legend:'Legend', epic:'Epic', master:'Master'};
+  const wrap = document.getElementById('filterChips');
+  wrap.innerHTML = ranks.map(r=>`<button class="chip ${activeFilter===r?'active':''}" onclick="setFilter('${r}')">${labels[r]}</button>`).join('');
+}
+function setFilter(r){ activeFilter=r; renderChips(); renderGrid(); }
+
+function mainPhotoUrl(listing){
+  const photos = (listing.listing_photos || []).slice().sort((a,b)=>a.position-b.position);
+  const idx = Math.min(listing.main_photo_index || 0, photos.length-1);
+  return photos.length ? photos[idx].photo_url : null;
+}
 
 async function renderGrid(){
   const grid = document.getElementById('catalogGrid');
   grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px 0;color:var(--text-dim);">Yuklanmoqda...</div>`;
   const params = new URLSearchParams();
+  if(activeFilter !== 'all') params.set('rank', activeFilter);
   const q = document.getElementById('searchInput').value.trim();
   if(q) params.set('q', q);
 
@@ -903,14 +985,11 @@ async function renderGrid(){
   });
 }
 
+/* ---------------------------------------------------------------------
+   ACCOUNT DETAIL + GALLERY (prev/next/pause)
+   --------------------------------------------------------------------- */
 let gal = {idx:0, total:0, timer:null, paused:false};
 let currentDetailListing = null;
-
-function mainPhotoUrl(listing){
-  const photos = (listing.listing_photos || []).slice().sort((a,b)=>a.position-b.position);
-  const idx = Math.min(listing.main_photo_index || 0, photos.length-1);
-  return photos.length ? photos[idx].photo_url : null;
-}
 
 async function openDetail(id){
   let a;
@@ -952,7 +1031,7 @@ async function openDetail(id){
       <div class="block-label">Sotuvchi izohi</div>
       <div class="comment-box">"${escapeHtml(a.comment||'')}"</div>
       <div class="detail-actions">
-        <button class="btn btn-primary" onclick="openChatForListing(${a.id})"> Sotib olish — maxfiy chatga kirish</button>
+        <button class="btn btn-primary" onclick="openChatForListing(${a.id})">🔒 Sotib olish — maxfiy chatga kirish</button>
         <button class="btn btn-ghost" onclick="closeOverlay('detailOverlay')">Yopish</button>
       </div>
     </div>`;
@@ -983,6 +1062,9 @@ function galTogglePlay(){
   if(gal.paused){ if(gal.timer) clearInterval(gal.timer); } else galRestartTimer();
 }
 
+/* ---------------------------------------------------------------------
+   CHAT (Supabase Realtime)
+   --------------------------------------------------------------------- */
 let chatChannel = null;
 let currentChatId = null;
 let currentChatRole = 'buyer';
@@ -1052,6 +1134,9 @@ function sendMsg(){
   input.value = '';
 }
 
+/* ---------------------------------------------------------------------
+   SELL FORM (real image upload to Supabase Storage)
+   --------------------------------------------------------------------- */
 let sellFiles = [];
 let sellMainIndex = 0;
 
@@ -1125,20 +1210,14 @@ async function submitSell(){
   }catch(e){ showToast(e.message); }
 }
 
+/* ---------------------------------------------------------------------
+   SELLER PANEL (rendered inline inside the "Profil" bottom-nav page)
+   --------------------------------------------------------------------- */
 async function renderProfile(){
-  if(!currentSession){
-    document.getElementById('myListings').innerHTML = '<div class="empty-note">Tizimga kiring</div>';
-    return;
-  }
-  
   let mine = [], myChats = [];
   try{
     [mine, myChats] = await Promise.all([api('/api/my-listings'), api('/api/my-chats')]);
-  }catch(e){
-    console.error('Profile ma\'lumotlarini yuklashda xatolik:', e);
-    mine = [];
-    myChats = [];
-  }
+  }catch(e){ showToast(e.message); return; }
 
   document.getElementById('myCount').textContent = `(${mine.length})`;
   const pendingCount = mine.filter(a=>(a.delete_requests||[]).some(r=>r.status==='pending')).length;
@@ -1156,29 +1235,21 @@ async function renderProfile(){
   wrap.innerHTML = mine.map(a=>{
     const pending = (a.delete_requests||[]).some(r=>r.status==='pending');
     const chat = myChats.find(c=>c.listing_id===a.id);
-    
-    let actionButton = '';
-    if(a.status === 'sold'){
-      actionButton = `<button class="btn btn-ghost" style="font-size:12px;padding:8px 12px;color:var(--danger);border-color:#f8717155;flex-shrink:0;" onclick="deleteSoldListing(${a.id})">🗑 O'chirish</button>`;
-    } else if(pending){
-      actionButton = `<span class="pending-tag">⏳ Admin javobi kutilmoqda</span>`;
-    } else {
-      actionButton = `<button class="btn btn-ghost" style="font-size:12px;padding:8px 12px;color:var(--danger);border-color:#f8717155;flex-shrink:0;" onclick="requestSold(${a.id})">✓ Sotildi</button>`;
-    }
-    
     return `
     <div class="listing-row">
       <div class="hex ${rankHex[a.rank]}" style="width:34px;height:34px;font-size:8px;flex-shrink:0;">${rankLabel[a.rank].slice(0,3)}</div>
       <div class="lr-info">
         <div class="lr-title"><span class="mono" style="color:var(--text-dim);">#${a.id}</span> ${escapeHtml(a.title)}</div>
         <div class="lr-price mono">${fmt(a.price)}</div>
-        ${a.status === 'sold' ? '<div style="font-size:11px;color:var(--gold);margin-top:2px;">✓ Sotilgan</div>' : ''}
       </div>
       ${chat
         ? `<button class="btn btn-ghost" style="font-size:12px;padding:8px 12px;flex-shrink:0;" onclick="openChatWithId(${chat.id}, '${escapeHtml(a.title)}', '${escapeHtml((chat.buyer&&chat.buyer.name)||'')}', 'seller')">💬 Chatga kirish</button>`
         : `<span style="font-size:11.5px;color:var(--text-dim);flex-shrink:0;">Hali xaridor yo'q</span>`
       }
-      ${actionButton}
+      ${pending
+        ? `<span class="pending-tag">⏳ Admin javobi kutilmoqda</span>`
+        : `<button class="btn btn-ghost" style="font-size:12px;padding:8px 12px;color:var(--danger);border-color:#f8717155;flex-shrink:0;" onclick="requestSold(${a.id})">✓ Sotildi</button>`
+      }
     </div>`;
   }).join('');
 }
@@ -1191,18 +1262,9 @@ async function requestSold(listingId){
   }catch(e){ showToast(e.message); }
 }
 
-async function deleteSoldListing(listingId){
-  if(!confirm("Bu sotilgan e'lonni o'chirishni xohlaysizmi? Bu amal qaytarib bo'lmaydi!")) return;
-  try{
-    await api(`/api/listings/${listingId}`, { method:'DELETE' });
-    showToast("✓ E'lon o'chirildi");
-    renderProfile();
-    renderGrid();
-  }catch(e){
-    showToast(e.message);
-  }
-}
-
+/* ---------------------------------------------------------------------
+   ADMIN PANEL
+   --------------------------------------------------------------------- */
 function openAdmin(){
   if(!currentProfile || currentProfile.role !== 'admin'){ showToast("Faqat admin uchun."); return; }
   adminSwitchTab('requests');
@@ -1285,6 +1347,11 @@ async function renderAdminAds(){
     <div class="req-row" style="flex-direction:column;align-items:stretch;gap:12px;">
       <div class="req-title">${label}</div>
       <div class="field" style="margin-bottom:0;">
+        <label>Rasm (ixtiyoriy — banner foni sifatida chiqadi)</label>
+        <input type="file" id="ad_${key}_file" accept="image/*" style="margin-bottom:8px;color:var(--text-dim);font-size:13px;">
+        <div id="ad_${key}_preview" style="${ad.image_url ? '' : 'display:none;'}height:90px;border-radius:10px;background-size:cover;background-position:center;background-image:url('${ad.image_url||''}');border:1px solid var(--border);"></div>
+      </div>
+      <div class="field" style="margin-bottom:0;">
         <label>Sarlavha</label>
         <input id="ad_${key}_title" value="${escapeHtml(ad.title||'')}">
       </div>
@@ -1303,14 +1370,40 @@ async function renderAdminAds(){
     </div>`;
   };
   wrap.innerHTML = slotForm('top', "Yuqori reklama joyi") + slotForm('bottom', "Pastki reklama joyi");
+
+  ['top','bottom'].forEach(key=>{
+    const fileInput = document.getElementById(`ad_${key}_file`);
+    fileInput.addEventListener('change', ()=>{
+      const file = fileInput.files[0];
+      if(!file) return;
+      const preview = document.getElementById(`ad_${key}_preview`);
+      preview.style.backgroundImage = `url('${URL.createObjectURL(file)}')`;
+      preview.style.display = 'block';
+    });
+  });
 }
+
 async function saveAd(key){
   const title = document.getElementById(`ad_${key}_title`).value.trim();
   const subtitle = document.getElementById(`ad_${key}_sub`).value.trim();
   const cta = document.getElementById(`ad_${key}_cta`).value.trim() || "Batafsil";
   if(!title){ showToast("Sarlavha bo'sh bo'lmasin."); return; }
+
+  let image_url = null;
+  const file = document.getElementById(`ad_${key}_file`).files[0];
+  if(file){
+    showToast("Rasm yuklanmoqda...");
+    const path = `${key}-${Date.now()}-${file.name}`;
+    const { error } = await supabaseClient.storage.from('ad-images').upload(path, file, { upsert: true });
+    if(error){ showToast("Rasm yuklashda xatolik: " + error.message); return; }
+    const { data } = supabaseClient.storage.from('ad-images').getPublicUrl(path);
+    image_url = data.publicUrl;
+  }
+
   try{
-    await api(`/api/admin/ads/${key}`, { method:'POST', body: JSON.stringify({title,subtitle,cta}) });
+    const body = {title, subtitle, cta};
+    if(image_url) body.image_url = image_url;
+    await api(`/api/admin/ads/${key}`, { method:'POST', body: JSON.stringify(body) });
     showToast("Reklama joylandi ✓"); renderAds(); renderAdminAds();
   }catch(e){ showToast(e.message); }
 }
@@ -1319,6 +1412,9 @@ async function removeAd(key){
   catch(e){ showToast(e.message); }
 }
 
+/* ---------------------------------------------------------------------
+   PUBLIC AD SLOTS
+   --------------------------------------------------------------------- */
 async function renderAds(){
   let adsList = [];
   try{ adsList = await api('/api/ads'); }catch(e){ return; }
@@ -1328,12 +1424,20 @@ async function renderAds(){
     const ad = bySlot[key];
     if(!ad || !ad.title){
       el.className = 'ad-slot empty';
+      el.style.backgroundImage = '';
       el.innerHTML = "Reklama joyi — bu yerga faqat admin reklama joylashtira oladi";
       return;
     }
     el.className = 'ad-slot filled';
     el.style.setProperty('--ad-c1', ad.color1 || '#241a3d');
     el.style.setProperty('--ad-c2', ad.color2 || '#1a2b2a');
+    if(ad.image_url){
+      el.style.backgroundImage = `linear-gradient(90deg, rgba(10,13,22,.88), rgba(10,13,22,.35)), url('${ad.image_url}')`;
+      el.style.backgroundSize = 'cover';
+      el.style.backgroundPosition = 'center';
+    } else {
+      el.style.backgroundImage = '';
+    }
     el.innerHTML = `
       <span class="ad-label-tag">Reklama</span>
       <div>
@@ -1346,6 +1450,10 @@ async function renderAds(){
   });
 }
 
+/* ---------------------------------------------------------------------
+   INIT
+   --------------------------------------------------------------------- */
+renderChips();
 renderGrid();
 renderAds();
 
